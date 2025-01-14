@@ -68,9 +68,9 @@ export default function SudokuPage() {
         <title>{ title }</title>
       </Head>
       <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center pt-10">
-        <h1 className="text-3xl font-bold mb-6">{ title }</h1>
+        <h1 className="text-3xl font-bold mb-6 px-3 text-center">{ title }</h1>
         <div className="mb-4 flex gap-4">
-          <div>
+          <div className='px-3'>
             <label htmlFor="difficulty" className="mr-2 font-semibold">
               { difficul }:
             </label>
