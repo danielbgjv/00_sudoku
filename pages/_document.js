@@ -48,8 +48,30 @@ export default function Document( { lang, translations } ) {
   );
 }
 
-// Detecta o idioma do usuário e seleciona as traduções apropriadas
 Document.getInitialProps = async ( ctx ) => {
+  const initialProps = await ctx.defaultGetInitialProps( ctx );
+
+  const lang = ctx.locale || "en"; // Pega o idioma da configuração i18n
+  const translations = {
+    en,
+    pt,
+    es,
+  }[ lang ] || en; // Traduções com fallback para inglês
+
+  console.log( "lang", lang );
+
+  return {
+    ...initialProps,
+    lang,
+    translations,
+  };
+};
+
+
+
+
+// Detecta o idioma do usuário e seleciona as traduções apropriadas
+/* Document.getInitialProps = async ( ctx ) => {
   const initialProps = await ctx.defaultGetInitialProps( ctx );
 
   const req = ctx.req;
@@ -77,3 +99,4 @@ Document.getInitialProps = async ( ctx ) => {
     translations,
   };
 };
+ */
