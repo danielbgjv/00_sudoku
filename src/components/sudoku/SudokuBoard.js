@@ -6,6 +6,49 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
   const [ board, setBoard ] = useState( [] );
   const [ selectedCell, setSelectedCell ] = useState( null ); // Armazena a célula selecionada
   const { t } = useTranslation( 'common' );
+  const [ errors, setErrors ] = useState( [] );
+  const [ showErrors, setShowErrors ] = useState( false );
+
+  const toggleErrors = () => {
+    if ( !showErrors ) {
+      // Identifica erros apenas quando ativar a exibição
+      const newErrors = [];
+
+      board.forEach( ( row, rowIndex ) => {
+        row.forEach( ( cell, colIndex ) => {
+          // Verifica se o valor não é 0 (vazio) e está incorreto
+          if ( cell !== 0 && cell !== solution[ rowIndex ][ colIndex ] ) {
+            newErrors.push( { rowIndex, colIndex } );
+          }
+        } );
+      } );
+
+      setErrors( newErrors );
+    }
+
+    // Alterna a exibição dos erros
+    setShowErrors( !showErrors );
+  };
+
+
+  const checkErrors = () => {
+    const newErrors = [];
+
+    board.forEach( ( row, rowIndex ) => {
+      row.forEach( ( cell, colIndex ) => {
+        // Verifica se o valor não é 0 (vazio) e está incorreto
+        if ( cell !== 0 && cell !== solution[ rowIndex ][ colIndex ] ) {
+          newErrors.push( { rowIndex, colIndex } );
+        }
+      } );
+    } );
+
+    setErrors( newErrors );
+
+    if ( newErrors.length === 0 ) {
+      alert( t( 'noErrors' ) ); // Mensagem quando não há erros
+    }
+  };
 
   useEffect( () => {
     const boardCopy = puzzle.map( row => [ ...row ] );
@@ -36,6 +79,12 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
             row.map( ( cellValue, colIndex ) => {
               const originalValue = puzzle[ rowIndex ][ colIndex ];
               const isFixed = originalValue !== 0;
+              const isError =
+                showErrors &&
+                errors.some(
+                  ( error ) => error.rowIndex === rowIndex && error.colIndex === colIndex
+                );
+
 
               return (
                 <div
@@ -47,7 +96,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
                     colIndex % 3 === 0 && colIndex !== 0 ? 'border-l-2 border-l-white' : '',
                     colIndex === 8 ? 'border-r-0' : '',
                     rowIndex === 8 ? 'border-b-0' : '',
-                    isFixed ? 'bg-gray-500' : 'bg-gray-800',
+                    isFixed ? '!bg-gray-700' : isError ? '!bg-red-500' : 'bg-gray-800', // Destaca células incorretas
                   ].join( ' ' ) }
                   onClick={ () => {
                     if ( !isFixed ) setSelectedCell( { rowIndex, colIndex } );
@@ -93,7 +142,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
                 className="p-1 flex items-center justify-center bg-red-700 hover:bg-red-600 text-white rounded-md"
                 onClick={ () => handleChange( selectedCell.rowIndex, selectedCell.colIndex, 0 ) }
               >
-                { t( 'close' ) }
+                { t( 'clear' ) }
               </button>
             </div>
           </div>
@@ -105,6 +154,14 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
       >
         { t( 'checkSudoku' ) }
+      </button>
+
+      <button
+        onClick={ toggleErrors }
+        className={ `${ showErrors ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+          } text-white px-4 py-2 rounded-md` }
+      >
+        { showErrors ? t( 'hideErrors' ) : t( 'checkErrors' ) }
       </button>
     </div>
   );
