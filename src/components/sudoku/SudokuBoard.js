@@ -55,6 +55,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
                   // Remove borda duplicada entre células vizinhas
                   colIndex === 8 ? 'border-r-0' : '',
                   rowIndex === 8 ? 'border-b-0' : '',
+                  isFixed ? 'bg-gray-700' : '', // destaca células fixas
                 ].join( ' ' ) }
               >
                 { isFixed ? (

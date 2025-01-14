@@ -78,7 +78,14 @@ function generateSudoku( difficulty ) {
   return { puzzle, solution: shuffled };
 }
 
+function clearUserInput( currentBoard, puzzle ) {
+  return currentBoard.map( ( row, i ) =>
+    row.map( ( cell, j ) => ( puzzle[ i ][ j ] === 0 ? 0 : cell ) )
+  );
+}
+
 module.exports = {
   generateSudoku,
   isBoardCorrect,
+  clearUserInput
 };

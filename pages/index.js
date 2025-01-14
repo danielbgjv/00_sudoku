@@ -1,6 +1,6 @@
 // pages/sudoku/index.js
 import { useState, useEffect } from 'react';
-import { generateSudoku } from '@/utils/sudokuGenerator';
+import { generateSudoku, clearUserInput } from '@/utils/sudokuGenerator';
 import SudokuBoard from '@/src/components/sudoku/SudokuBoard';
 import { useTranslation } from 'react-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -21,6 +21,19 @@ export default function SudokuPage() {
   const [ congratulations, setCongratulations ] = useState( '' );
   const [ completedMessage, setCompletedMessage ] = useState( '' );
   const [ close, setClose ] = useState( '' );
+  const [ currentBoard, setCurrentBoard ] = useState( null );
+
+
+  /* const handleClear = () => {
+    if ( game ) {
+      // Seleciona todos os inputs no tabuleiro e limpa seus valores
+      const inputs = document.querySelectorAll( 'input[type="number"]' );
+      inputs.forEach( input => ( input.value = "" ) );
+      //setCurrentBoard( clearUserInput( currentBoard, game.puzzle ) );
+    }
+  };
+ */
+
 
   useEffect( () => {
 
@@ -41,6 +54,8 @@ export default function SudokuPage() {
     const { puzzle, solution } = generateSudoku( difficulty );
     setGame( { puzzle, solution } );
     setShowModal( false );
+    setCurrentBoard( puzzle.map( row => [ ...row ] ) ); // Copia do puzzle inicial
+
   };
 
   const handleComplete = () => {
@@ -86,6 +101,10 @@ export default function SudokuPage() {
           />
         ) }
 
+        {/*   <button onClick={ handleClear } className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white mt-5">
+          Limpar Entrada
+        </button>
+ */}
         <LanguageSwitcher />
 
         {/* Modal de Parabéns */ }
