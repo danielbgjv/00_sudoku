@@ -60,7 +60,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
                 ) : (
                   <input
                     className="w-full h-full text-center bg-inherit outline-none"
-                    type="text"
+                    type="number"
                     maxLength={ 1 }
                     value={ cellValue === 0 ? '' : cellValue }
                     onChange={ ( e ) => handleChange( rowIndex, colIndex, e.target.value ) }
