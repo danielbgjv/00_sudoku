@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
+import Image from 'next/image';
 
 export default function SudokuPage() {
   const [ difficulty, setDifficulty ] = useState( 'easy' );
@@ -68,7 +69,8 @@ export default function SudokuPage() {
         <title>{ title }</title>
       </Head>
       <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center pt-10">
-        <h1 className="text-3xl font-bold mb-6 px-3 text-center">{ title }</h1>
+        <Image src="/logo.png" width={ 100 } height={ 100 } alt="Sudoku" />
+        <h1 className="text-3xl font-bold mb-6 px-3 text-center mt-5">{ title }</h1>
         <div className="mb-4 flex gap-4">
           <div className='px-3'>
             <label htmlFor="difficulty" className="mr-2 font-semibold">
