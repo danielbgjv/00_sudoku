@@ -1,9 +1,11 @@
 // components/SudokuBoard.js
 import { useState, useEffect } from 'react';
 import { isBoardCorrect } from '@/utils/sudokuGenerator';
+import { useTranslation } from 'react-i18next';
 
 export default function SudokuBoard( { puzzle, solution, onComplete } ) {
   const [ board, setBoard ] = useState( [] );
+  const { t } = useTranslation( 'common' ); // Use o namespace 'common'
 
   useEffect( () => {
     // Copiar o puzzle inicial para o state
@@ -27,7 +29,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
     if ( isBoardCorrect( board, solution ) ) {
       onComplete();
     } else {
-      alert( 'Há erros no Sudoku. Verifique e tente novamente!' );
+      alert( t( 'errorsMessage' ) );
     }
   };
 
@@ -59,7 +61,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
                   <span className="font-bold">{ cellValue }</span>
                 ) : (
                   <input
-                    className="w-full h-full text-center bg-inherit outline-none"
+                    className="w-full h-full text-center bg-inherit outline-none no-spin"
                     type="number"
                     maxLength={ 1 }
                     value={ cellValue === 0 ? '' : cellValue }
@@ -76,7 +78,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
         onClick={ checkSolution }
         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
       >
-        Verificar Sudoku
+        { t( 'checkSudoku' ) }
       </button>
     </div>
   );

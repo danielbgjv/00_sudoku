@@ -1,0 +1,15 @@
+{
+  "title": "SudokuDan - Sudoku Simple e Intuitivo",
+  "description": "¡Desafía tu mente con SudokuDan, un juego de Sudoku simple, intuitivo y divertido! Juega gratis en cualquier dispositivo y mejora tus habilidades lógicas.",
+  "keywords": "sudoku, juego, gratis, online, jugar, lógica, rompecabezas, números, sudoku dan, sudoku juego, sudoku online, sudoku rompecabezas, sudoku números, sudoku lógica, sudoku jugar, sudoku gratis, sudoku juego online, sudoku juego gratis, sudoku juego jugar, sudoku juego números, sudoku juego lógica, sudoku juego rompecabezas, sudoku juego dan, sudoku juego sudoku, sudoku juego simple, sudoku juego intuitivo, sudoku juego divertido, sudoku juego dispositivo, sudoku juego mejorar, sudoku juego habilidades, sudoku juego mente, sudoku juego desafío, sudoku juego descripción, sudoku juego palabras clave",
+  "difficulty": "Dificultad",
+  "easy": "Fácil",
+  "medium": "Medio",
+  "hard": "Difícil",
+  "startGame": "Iniciar Juego",
+  "congratulations": "¡Felicidades!",
+  "completedMessage": "¡Completaste el Sudoku sin errores!",
+  "close": "Cerrar",
+  "checkSudoku": "Verificar Sudoku",
+  "errorsMessage": "Hay errores en el Sudoku. ¡Revisa e inténtalo de nuevo!"
+}
