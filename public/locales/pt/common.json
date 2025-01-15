@@ -14,5 +14,8 @@
   "checkSudoku": "Verificar Sudoku",
   "errorsMessage": "Há erros no Sudoku. Verifique e tente novamente!",
   "hideErrors": "Ocultar Erros",
-  "checkErrors": "Verificar Erros"
+  "checkErrors": "Verificar Erros",
+  "continue": "Continuar",
+  "restart": "Reiniciar",
+  "savedGame": "Você tem um jogo salvo. Deseja continuar?"
 }

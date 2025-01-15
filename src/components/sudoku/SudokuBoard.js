@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { isBoardCorrect } from '@/utils/sudokuGenerator';
 import { useTranslation } from 'react-i18next';
 
-export default function SudokuBoard( { puzzle, solution, onComplete } ) {
-  const [ board, setBoard ] = useState( [] );
+export default function SudokuBoard( { puzzle, solution, onComplete, savedGame } ) {
+  const [ board, setBoard ] = useState( savedGame?.board?.map( ( row ) => [ ...row ] ) || [] ); // Armazena o estado atual do tabuleiro
   const [ selectedCell, setSelectedCell ] = useState( null ); // Armazena a célula selecionada
   const { t } = useTranslation( 'common' );
   const [ errors, setErrors ] = useState( [] );
   const [ showErrors, setShowErrors ] = useState( false );
+
+  const [ useSavedGame, setUseSavedGame ] = useState( true );
 
   const toggleErrors = () => {
     if ( !showErrors ) {
@@ -31,29 +33,30 @@ export default function SudokuBoard( { puzzle, solution, onComplete } ) {
   };
 
 
-  const checkErrors = () => {
-    const newErrors = [];
-
-    board.forEach( ( row, rowIndex ) => {
-      row.forEach( ( cell, colIndex ) => {
-        // Verifica se o valor não é 0 (vazio) e está incorreto
-        if ( cell !== 0 && cell !== solution[ rowIndex ][ colIndex ] ) {
-          newErrors.push( { rowIndex, colIndex } );
-        }
-      } );
-    } );
-
-    setErrors( newErrors );
-
-    if ( newErrors.length === 0 ) {
-      alert( t( 'noErrors' ) ); // Mensagem quando não há erros
-    }
-  };
 
   useEffect( () => {
-    const boardCopy = puzzle.map( row => [ ...row ] );
-    setBoard( boardCopy );
-  }, [ puzzle ] );
+
+    if ( savedGame && useSavedGame ) {
+      const savedCopy = savedGame.board.map( ( row ) => [ ...row ] );
+      setBoard( savedCopy ); // Define o estado com o jogo salvo
+      //setUseSavedGame( false ); // Evita que este bloco seja reexecutado
+    } else {
+      const boardCopy = puzzle.map( ( row ) => [ ...row ] );
+      setBoard( boardCopy ); // Define o estado com um novo tabuleiro
+    }
+  }, [ useSavedGame, puzzle ] ); // Incluímos `useSavedGame` e `puzzle` nas dependências.
+
+
+  useEffect( () => {
+    if ( board.length ) {
+      const gameState = {
+        puzzle,
+        board, // Salva o estado atual do tabuleiro
+        solution,
+      };
+      localStorage.setItem( 'sudoku', JSON.stringify( gameState ) );
+    }
+  }, [ board ] ); // Salva no localStorage sempre que o tabuleiro muda
 
   const handleChange = ( rowIndex, colIndex, value ) => {
     const newBoard = board.map( row => [ ...row ] );

@@ -7,6 +7,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
 import Image from 'next/image';
+import useLocalStorage from '@/utils/useLocalStorage';
 
 export default function SudokuPage() {
   const [ difficulty, setDifficulty ] = useState( 'easy' );
@@ -24,17 +25,21 @@ export default function SudokuPage() {
   const [ close, setClose ] = useState( '' );
   const [ currentBoard, setCurrentBoard ] = useState( null );
 
+  const getSavedGame = useLocalStorage( 'sudoku' );
+  const savedGame = getSavedGame && JSON.parse( getSavedGame );
+  const [ showSavedGame, setShowSavedGame ] = useState( true );
+  const [ hasSavedGame, setHasSavedGame ] = useState( false );
 
-  /* const handleClear = () => {
-    if ( game ) {
-      // Seleciona todos os inputs no tabuleiro e limpa seus valores
-      const inputs = document.querySelectorAll( 'input[type="number"]' );
-      inputs.forEach( input => ( input.value = "" ) );
-      //setCurrentBoard( clearUserInput( currentBoard, game.puzzle ) );
+  useEffect( () => {
+    const getSavedGame = localStorage.getItem( 'sudoku' );
+    const savedGame = getSavedGame ? JSON.parse( getSavedGame ) : null;
+
+    if ( savedGame && savedGame.board && savedGame.puzzle && savedGame.solution ) {
+      setHasSavedGame( true ); // Há um jogo salvo válido
+    } else {
+      setHasSavedGame( false ); // Não há jogo salvo válido
     }
-  };
- */
-
+  }, [] );
 
   useEffect( () => {
 
@@ -56,7 +61,11 @@ export default function SudokuPage() {
     setGame( { puzzle, solution } );
     setShowModal( false );
     setCurrentBoard( puzzle.map( row => [ ...row ] ) ); // Copia do puzzle inicial
-
+    localStorage.setItem(
+      'sudoku',
+      JSON.stringify( { puzzle, solution, board: puzzle.map( row => [ ...row ] ) } ) // Adiciona o estado atual do board ao localStorage
+    );
+    setHasSavedGame( false ); // Invalida o jogo salvo
   };
 
   const handleComplete = () => {
@@ -71,42 +80,80 @@ export default function SudokuPage() {
       <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center pt-10">
         <Image src="/logo.png" width={ 100 } height={ 100 } alt="Sudoku" />
         <h1 className="text-3xl font-bold mb-6 px-3 text-center mt-5">{ title }</h1>
-        <div className="mb-4 flex gap-4">
-          <div className='px-3'>
-            <label htmlFor="difficulty" className="mr-2 font-semibold">
-              { difficul }:
-            </label>
-            <select
-              id="difficulty"
-              value={ difficulty }
-              onChange={ ( e ) => setDifficulty( e.target.value ) }
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
-            >
-              <option value="easy">{ easy }</option>
-              <option value="medium">{ medium }</option>
-              <option value="hard">{ hard }</option>
-            </select>
-          </div>
-          <button
-            onClick={ startGame }
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
-          >
-            { startGame1 }
-          </button>
-        </div>
 
-        { game && (
-          <SudokuBoard
-            puzzle={ game.puzzle }
-            solution={ game.solution }
-            onComplete={ handleComplete }
-          />
-        ) }
+        {
+          hasSavedGame && showSavedGame && (
+            <div className="mb-4 px-3">
+              <h1 className="text-2xl font-bold mb-4 text-center p-3 rounded-md bg-gray-700 border border-white">{ t( 'savedGame' ) }</h1>
 
-        {/*   <button onClick={ handleClear } className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white mt-5">
-          Limpar Entrada
-        </button>
- */}
+              <div className='flex items-center justify-center gap-5'>
+                <button
+                  onClick={ () => {
+                    const { puzzle, solution, board } = savedGame;
+                    setGame( { puzzle, solution } );
+                    setCurrentBoard( board ); // Define o board salvo como atual
+                    setShowModal( false );
+                    setShowSavedGame( false );
+                    setHasSavedGame( false ); // Invalida o jogo salvo
+                  } }
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
+                >
+                  { t( 'continue' ) }
+                </button>
+
+                <button
+                  onClick={ () => {
+                    localStorage.removeItem( 'sudoku' ); // Remove o jogo salvo
+                    //clearUserInput( savedGame.puzzle ); // Limpa as células preenchidas pelo usuário
+                    //startGame(); // Reinicia o jogo
+                    //setShowSavedGame( false );
+                    setHasSavedGame( false ); // Atualiza o estado local
+                  } }
+                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
+                >
+                  { t( 'restart' ) }
+                </button>
+              </div>
+            </div>
+          )
+        }
+
+        { !hasSavedGame &&
+          <>
+            <div className="mb-4 flex gap-4">
+              <div className='px-3'>
+                <label htmlFor="difficulty" className="mr-2 font-semibold">
+                  { difficul }:
+                </label>
+                <select
+                  id="difficulty"
+                  value={ difficulty }
+                  onChange={ ( e ) => setDifficulty( e.target.value ) }
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
+                >
+                  <option value="easy">{ easy }</option>
+                  <option value="medium">{ medium }</option>
+                  <option value="hard">{ hard }</option>
+                </select>
+              </div>
+              <button
+                onClick={ startGame }
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
+              >
+                { startGame1 }
+              </button>
+            </div>
+
+            { game && (
+              <SudokuBoard
+                puzzle={ game.puzzle }
+                solution={ game.solution }
+                onComplete={ handleComplete }
+                savedGame={ savedGame }
+              />
+            ) }
+          </> }
+
         <LanguageSwitcher />
 
         {/* Modal de Parabéns */ }
@@ -126,7 +173,7 @@ export default function SudokuPage() {
             </div>
           </div>
         ) }
-      </div>
+      </div >
     </>
   );
 }
