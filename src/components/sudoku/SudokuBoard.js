@@ -1,17 +1,43 @@
 import { useState, useEffect } from 'react';
 import { isBoardCorrect } from '@/utils/sudokuGenerator';
 import { useTranslation } from 'react-i18next';
+import { saveEncryptedToLocalStorage, getDecryptedFromLocalStorage } from '@/utils/functions';
 
-export default function SudokuBoard( { puzzle, solution, onComplete, savedGame } ) {
+export default function SudokuBoard( { puzzle, solution, onComplete, savedGame, showModal2, setShowModal2, canShowErrors, handlePayment } ) {
   const [ board, setBoard ] = useState( savedGame?.board?.map( ( row ) => [ ...row ] ) || [] ); // Armazena o estado atual do tabuleiro
   const [ selectedCell, setSelectedCell ] = useState( null ); // Armazena a célula selecionada
   const { t } = useTranslation( 'common' );
   const [ errors, setErrors ] = useState( [] );
   const [ showErrors, setShowErrors ] = useState( false );
-
   const [ useSavedGame, setUseSavedGame ] = useState( true );
 
+  useEffect( () => {
+    if ( canShowErrors ) {
+      const newErrors = [];
+      board.forEach( ( row, rowIndex ) => {
+        row.forEach( ( cell, colIndex ) => {
+          // Verifica se o valor não é 0 (vazio) e está incorreto
+          if ( cell !== 0 && cell !== solution[ rowIndex ][ colIndex ] ) {
+            newErrors.push( { rowIndex, colIndex } );
+          }
+        } );
+      } );
+
+      setErrors( newErrors );
+      setShowErrors( true );
+    }
+    //eslint-disable-next-line
+  }, [ canShowErrors ] );
+
+
   const toggleErrors = () => {
+
+    if ( !savedGame?.config?.showErrors ) {
+      handlePayment();
+      setShowModal2( true );
+      return;
+    }
+
     if ( !showErrors ) {
       // Identifica erros apenas quando ativar a exibição
       const newErrors = [];
@@ -44,6 +70,7 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame }
       const boardCopy = puzzle.map( ( row ) => [ ...row ] );
       setBoard( boardCopy ); // Define o estado com um novo tabuleiro
     }
+    //eslint-disable-next-line
   }, [ useSavedGame, puzzle ] ); // Incluímos `useSavedGame` e `puzzle` nas dependências.
 
 
@@ -54,8 +81,10 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame }
         board, // Salva o estado atual do tabuleiro
         solution,
       };
-      localStorage.setItem( 'sudoku', JSON.stringify( gameState ) );
+      /* localStorage.setItem( 'sudoku', JSON.stringify( gameState ) ); */
+      saveEncryptedToLocalStorage( 'sudoku', gameState );
     }
+    //eslint-disable-next-line
   }, [ board ] ); // Salva no localStorage sempre que o tabuleiro muda
 
   const handleChange = ( rowIndex, colIndex, value ) => {
@@ -135,7 +164,37 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame }
               <button
                 key={ number }
                 className="w-10 h-10 flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white rounded-md"
-                onClick={ () => handleChange( selectedCell.rowIndex, selectedCell.colIndex, number ) }
+                /* onClick={ () =>{ 
+                  handleChange( selectedCell.rowIndex, selectedCell.colIndex, number );
+                 }} */
+
+                onClick={ () => {
+                  handleChange( selectedCell.rowIndex, selectedCell.colIndex, number );
+                  // Atualiza o estado do tabuleiro imediatamente na lógica local
+                  const updatedBoard = board.map( ( row, rowIndex ) =>
+                    rowIndex === selectedCell.rowIndex
+                      ? row.map( ( cell, colIndex ) =>
+                        colIndex === selectedCell.colIndex ? number : cell
+                      )
+                      : row
+                  );
+
+                  // Verifica se é o último número a ser preenchido (ou seja, nenhum zero no tabuleiro atualizado)
+                  const isLastZero = !updatedBoard.some( ( row ) => row.includes( 0 ) );
+
+                  // Atualiza o estado para refletir o número inserido
+                  setBoard( updatedBoard );
+
+                  // Se for o último número, chama a função checkSolution
+                  if ( isLastZero ) {
+                    const isCorrect = isBoardCorrect( updatedBoard, solution );
+                    if ( isCorrect ) {
+                      onComplete(); // Sucesso
+                    } else {
+                      alert( t( 'errorsMessage' ) ); // Erro
+                    }
+                  }
+                } }
               >
                 { number }
               </button>
@@ -143,7 +202,9 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame }
             <div>
               <button
                 className="p-1 flex items-center justify-center bg-red-700 hover:bg-red-600 text-white rounded-md"
-                onClick={ () => handleChange( selectedCell.rowIndex, selectedCell.colIndex, 0 ) }
+                onClick={ () => {
+                  handleChange( selectedCell.rowIndex, selectedCell.colIndex, 0 );
+                } }
               >
                 { t( 'clear' ) }
               </button>
@@ -152,12 +213,12 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame }
         ) }
       </div>
 
-      <button
+      {/*  <button
         onClick={ checkSolution }
         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
       >
         { t( 'checkSudoku' ) }
-      </button>
+      </button>*/}
 
       <button
         onClick={ toggleErrors }

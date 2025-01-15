@@ -20,5 +20,8 @@
   "savedGame": "Você tem um jogo salvo. Deseja continuar?",
   "startNewGame": "Iniciar Novo Jogo",
   "newGame": "Novo jogo",
-  "playNow": "Jogar agora"
+  "playNow": "Jogar agora",
+  "titlePay": "Pague para desbloquear a função",
+  "payMassage": "Para ver os erros apenas para esse jogo, pague o valor de R$ 2,00",
+  "pay": "Pagar"
 }

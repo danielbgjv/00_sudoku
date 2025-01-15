@@ -8,6 +8,69 @@ import Head from 'next/head';
 import LanguageSwitcher from '@/src/components/LanguageSwitcher';
 import Image from 'next/image';
 import useLocalStorage from '@/utils/useLocalStorage';
+import { saveEncryptedToLocalStorage, getDecryptedFromLocalStorage } from '@/utils/functions';
+import { loadStripe } from '@stripe/stripe-js';
+import { useRouter } from 'next/router';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe( process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY );
+
+const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
+  const { t } = useTranslation( 'common' ); // Use o namespace 'common'
+  const [ pay, setPay ] = useState( '' );
+  const [ cancel, setCancel ] = useState( '' );
+
+  useEffect( () => {
+
+    if ( t ) {
+      setPay( t( 'pay' ) );
+      setCancel( t( 'cancel' ) );
+    }
+  }, [ t ] );
+
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const handleSubmit = async ( event ) => {
+    event.preventDefault();
+
+    if ( !stripe || !elements ) return;
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment( clientSecret, {
+      payment_method: {
+        card: elements.getElement( CardElement ),
+        billing_details: {
+          name: 'Sudoku User',
+        },
+      },
+    } );
+
+    if ( error ) {
+      console.error( 'Erro no pagamento:', error.message );
+    } else if ( paymentIntent.status === 'succeeded' ) {
+      // Atualize o estado ou localStorage para ativar o recurso
+      //localStorage.setItem('config', JSON.stringify({ showErrors: true }));
+      const savedGame = getDecryptedFromLocalStorage( localStorage.getItem( 'sudoku' ) );
+      saveEncryptedToLocalStorage( 'sudoku', { ...savedGame, config: { showErrors: true } } );
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={ handleSubmit } className="flex flex-col gap-4">
+      <CardElement className="border border-gray-300 p-2 rounded-md" />
+      <div className="flex gap-4">
+        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" disabled={ !stripe }>
+          { pay }
+        </button>
+        <button onClick={ onClose } className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+          { cancel }
+        </button>
+      </div>
+    </form>
+  );
+};
+
 
 export default function SudokuPage() {
   const [ difficulty, setDifficulty ] = useState( 'easy' );
@@ -25,15 +88,49 @@ export default function SudokuPage() {
   const [ completedMessage, setCompletedMessage ] = useState( '' );
   const [ close, setClose ] = useState( '' );
   const [ currentBoard, setCurrentBoard ] = useState( null );
-
+  const [ showModal2, setShowModal2 ] = useState( false );
+  const [ titlePay, setTitlePay ] = useState( '' );
+  const [ payMassage, setPayMassage ] = useState( '' );
+  const [ pay, setPay ] = useState( '' );
   const getSavedGame = useLocalStorage( 'sudoku' );
-  const savedGame = getSavedGame && JSON.parse( getSavedGame );
+  const savedGame = getDecryptedFromLocalStorage( getSavedGame );
   const [ showSavedGame, setShowSavedGame ] = useState( true );
   const [ hasSavedGame, setHasSavedGame ] = useState( false );
+  const router = useRouter();
+  const [ clientSecret, setClientSecret ] = useState( '' );
+  const [ canShowErrors, setCanShowErrors ] = useState( false );
+
+  const handlePayment = async () => {
+    const locale = router.locale || 'en';
+
+    const getCurrencyAndProductName = () => {
+      switch ( locale ) {
+        case 'pt':
+          return { currency: 'BRL', productName: 'Verificar Erros - SudokuDan' };
+        case 'es':
+          return { currency: 'EUR', productName: 'Verificar Errores - SudokuDan' };
+        default:
+          return { currency: 'USD', productName: 'Check Errors - SudokuDan' };
+      }
+    };
+
+    const { currency, productName } = getCurrencyAndProductName();
+
+    // Solicita o clientSecret do backend
+    const response = await fetch( '/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify( { currency, productName } ),
+    } );
+    const data = await response.json();
+    setClientSecret( data.clientSecret );
+    setShowModal2( true );
+  };
+
 
   useEffect( () => {
     const getSavedGame = localStorage.getItem( 'sudoku' );
-    const savedGame = getSavedGame ? JSON.parse( getSavedGame ) : null;
+    const savedGame = getSavedGame ? getDecryptedFromLocalStorage( getSavedGame ) : null;
 
     if ( savedGame && savedGame.board && savedGame.puzzle && savedGame.solution ) {
       setHasSavedGame( true ); // Há um jogo salvo válido
@@ -55,6 +152,9 @@ export default function SudokuPage() {
       setCompletedMessage( t( 'completedMessage' ) );
       setClose( t( 'close' ) );
       setStartNewGame( t( 'startNewGame' ) );
+      setTitlePay( t( 'titlePay' ) );
+      setPayMassage( t( 'payMassage' ) );
+      setPay( t( 'pay' ) );
     }
   }, [ t ] );
 
@@ -65,10 +165,7 @@ export default function SudokuPage() {
     setGame( { puzzle, solution } );
     setShowModal( false );
     setCurrentBoard( puzzle.map( row => [ ...row ] ) ); // Copia do puzzle inicial
-    localStorage.setItem(
-      'sudoku',
-      JSON.stringify( { puzzle, solution, board: puzzle.map( row => [ ...row ] ) } ) // Adiciona o estado atual do board ao localStorage
-    );
+    saveEncryptedToLocalStorage( 'sudoku', { puzzle, solution, board: puzzle.map( row => [ ...row ] ) } );
     setHasSavedGame( false ); // Invalida o jogo salvo
   };
 
@@ -155,10 +252,14 @@ export default function SudokuPage() {
                 solution={ game.solution }
                 onComplete={ handleComplete }
                 savedGame={ savedGame }
+                showModal2={ showModal2 }
+                setShowModal2={ setShowModal2 }
+                canShowErrors={ canShowErrors }
+                handlePayment={ handlePayment }
               />
             ) }
             { game &&
-              <button onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); } } className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white mt-5">
+              <button onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); setCanShowErrors( false ); } } className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white mt-5">
                 { t( 'newGame' ) }
               </button> }
           </> }
@@ -171,7 +272,7 @@ export default function SudokuPage() {
             <div className="bg-white text-black p-8 rounded-md">
               <h2 className="text-2xl font-bold mb-4">{ congratulations }</h2>
               <p className="mb-4">{ completedMessage }</p>
-              <div className='flex items-center justify-center'>
+              <div className='flex items-center justify-center gap-5'>
                 <button
                   className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
                   onClick={ () => setShowModal( false ) }
@@ -181,12 +282,32 @@ export default function SudokuPage() {
 
                 {/* //botão de novo jogo */ }
                 <button
-                  onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); } }
+                  onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); setShowModal( false ); } }
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 >
                   { startNewGame }
                 </button>
               </div>
+            </div>
+          </div>
+        ) }
+
+        {/* Modal de pagamento */ }
+        { showModal2 && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-white text-black p-8 rounded-md">
+              <h2 className="text-2xl font-bold mb-4">{ titlePay }</h2>
+              <p className="mb-4">{ payMassage }</p>
+              <Elements stripe={ stripePromise }>
+                <PaymentForm
+                  clientSecret={ clientSecret }
+                  onClose={ () => setShowModal2( false ) }
+                  onSuccess={ () => {
+                    setShowModal2( false );
+                    setCanShowErrors( true );
+                  } }
+                />
+              </Elements>
             </div>
           </div>
         ) }
