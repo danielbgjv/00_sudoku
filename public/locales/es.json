@@ -23,5 +23,6 @@
   "playNow": "Jugar ahora",
   "titlePay": "Pague para desbloquear la función",
   "payMassage": "Para ver los errores solo para este juego, pague el valor de 2,00 €",
-  "pay": "Pagar"
+  "pay": "Pagar",
+  "cancel": "Cancelar"
 }
