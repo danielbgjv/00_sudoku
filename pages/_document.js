@@ -58,7 +58,7 @@ Document.getInitialProps = async ( ctx ) => {
     es,
   }[ lang ] || en; // Traduções com fallback para inglês
 
-  console.log( "lang", lang );
+  //console.log( "lang", lang );
 
   return {
     ...initialProps,

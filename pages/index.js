@@ -19,12 +19,20 @@ const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
   const { t } = useTranslation( 'common' ); // Use o namespace 'common'
   const [ pay, setPay ] = useState( '' );
   const [ cancel, setCancel ] = useState( '' );
+  const [ message, setMessage ] = useState( '' );
+  const [ paymentError, setPaymentError ] = useState( "" );
+  const [ loading, setLoading ] = useState( false );
+  const [ errorMessage, setErrorMessage ] = useState( '' );
+  const [ paying, setPaying ] = useState( false );
 
   useEffect( () => {
 
     if ( t ) {
       setPay( t( 'pay' ) );
       setCancel( t( 'cancel' ) );
+      setPaymentError( t( 'paymentError' ) );
+      setErrorMessage( t( 'errorMessage' ) );
+      setPaying( t( 'paying' ) );
     }
   }, [ t ] );
 
@@ -36,6 +44,12 @@ const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
 
     if ( !stripe || !elements ) return;
 
+    if ( loading ) return;
+
+    setLoading( true );
+
+    setPaymentError( '' );
+
     const { error, paymentIntent } = await stripe.confirmCardPayment( clientSecret, {
       payment_method: {
         card: elements.getElement( CardElement ),
@@ -46,10 +60,11 @@ const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
     } );
 
     if ( error ) {
-      console.error( 'Erro no pagamento:', error.message );
+      setLoading( false );
+      //console.error( 'Erro no pagamento:', error.message );
+      setMessage( error.message );
     } else if ( paymentIntent.status === 'succeeded' ) {
-      // Atualize o estado ou localStorage para ativar o recurso
-      //localStorage.setItem('config', JSON.stringify({ showErrors: true }));
+      setLoading( false );
       const savedGame = getDecryptedFromLocalStorage( localStorage.getItem( 'sudoku' ) );
       saveEncryptedToLocalStorage( 'sudoku', { ...savedGame, config: { showErrors: true } } );
       onSuccess();
@@ -57,16 +72,19 @@ const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
   };
 
   return (
-    <form onSubmit={ handleSubmit } className="flex flex-col gap-4">
+    <form onSubmit={ handleSubmit } className="flex flex-col gap-4 max-w-[400px]">
       <CardElement className="border border-gray-300 p-2 rounded-md" />
       <div className="flex gap-4">
         <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" disabled={ !stripe }>
-          { pay }
+          { loading ? paying : pay }
         </button>
         <button onClick={ onClose } className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
           { cancel }
         </button>
       </div>
+      {
+        message && <p className="text-red-500 text-sm mt-5 break-words text-center">{ paymentError ? paymentError + ". " : "" }{ errorMessage }: { message }</p>
+      }
     </form>
   );
 };
@@ -294,9 +312,9 @@ export default function SudokuPage() {
 
         {/* Modal de pagamento */ }
         { showModal2 && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 px-3">
             <div className="bg-white text-black p-8 rounded-md">
-              <h2 className="text-2xl font-bold mb-4">{ titlePay }</h2>
+              <h2 className="text-2xl font-bold mb-4 text-center">{ titlePay }</h2>
               <p className="mb-4">{ payMassage }</p>
               <Elements stripe={ stripePromise }>
                 <PaymentForm

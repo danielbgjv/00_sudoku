@@ -14,7 +14,7 @@ export default async function handler( req, res ) {
                 payment_method_types: [ 'card' ],
             } );
 
-            console.log( paymentIntent );
+            //console.log( paymentIntent );
 
             res.status( 200 ).json( { clientSecret: paymentIntent.client_secret } );
         } catch ( error ) {

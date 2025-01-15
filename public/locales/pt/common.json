@@ -24,5 +24,8 @@
   "titlePay": "Pague para desbloquear a função",
   "payMassage": "Para ver os erros apenas para esse jogo, pague o valor de R$ 2,00",
   "pay": "Pagar",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "paymentError": "Seu cartão foi recusado, tente novamente ou entre em contato com o suporte.",
+  "errorMessage": "Mensagem de erro",
+  "paying": "Pagando..."
 }

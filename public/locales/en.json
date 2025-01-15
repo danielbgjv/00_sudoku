@@ -24,5 +24,8 @@
   "titlePay": "Pay to unlock the feature",
   "payMassage": "To see the errors only for this game, pay the amount of $2.00",
   "pay": "Pay",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "paymentError": "Your card was declined, please try again or contact support.",
+  "errorMessage": "Error message",
+  "paying": "Paying..."
 }
