@@ -17,5 +17,6 @@
   "checkErrors": "Check Errors",
   "continue": "Continue",
   "restart": "Restart",
-  "savedGame": "You have a saved game. Do you want to continue?"
+  "savedGame": "You have a saved game. Do you want to continue?",
+  "startNewGame": "Start New Game"
 }

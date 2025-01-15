@@ -21,6 +21,7 @@ export default function SudokuPage() {
   const [ hard, setHard ] = useState( '' );
   const [ startGame1, setStartGame1 ] = useState( '' );
   const [ congratulations, setCongratulations ] = useState( '' );
+  const [ startNewGame, setStartNewGame ] = useState( '' );
   const [ completedMessage, setCompletedMessage ] = useState( '' );
   const [ close, setClose ] = useState( '' );
   const [ currentBoard, setCurrentBoard ] = useState( null );
@@ -52,11 +53,14 @@ export default function SudokuPage() {
       setStartGame1( t( 'startGame' ) );
       setCongratulations( t( 'congratulations' ) );
       setCompletedMessage( t( 'completedMessage' ) );
+      setClose( t( 'close' ) );
+      setStartNewGame( t( 'startNewGame' ) );
     }
   }, [ t ] );
 
 
   const startGame = () => {
+    localStorage.removeItem( 'sudoku' ); // Remove o jogo salvo
     const { puzzle, solution } = generateSudoku( difficulty );
     setGame( { puzzle, solution } );
     setShowModal( false );
@@ -164,10 +168,18 @@ export default function SudokuPage() {
               <p className="mb-4">{ completedMessage }</p>
               <div className='flex items-center justify-center'>
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
                   onClick={ () => setShowModal( false ) }
                 >
                   { close }
+                </button>
+
+                {/* //botão de novo jogo */ }
+                <button
+                  onClick={ startGame }
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  { startNewGame }
                 </button>
               </div>
             </div>

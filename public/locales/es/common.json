@@ -17,5 +17,6 @@
   "checkErrors": "Verificar Errores",
   "continue": "Continuar",
   "restart": "Reiniciar",
-  "savedGame": "Tienes un juego guardado. ¿Quieres continuar?"
+  "savedGame": "Tienes un juego guardado. ¿Quieres continuar?",
+  "startNewGame": "Iniciar Nuevo Juego"
 }
