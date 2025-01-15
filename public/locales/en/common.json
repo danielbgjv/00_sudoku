@@ -18,5 +18,7 @@
   "continue": "Continue",
   "restart": "Restart",
   "savedGame": "You have a saved game. Do you want to continue?",
-  "startNewGame": "Start New Game"
+  "startNewGame": "Start New Game",
+  "newGame": "New game",
+  "playNow": "Play now"
 }

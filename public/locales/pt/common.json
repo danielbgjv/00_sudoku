@@ -18,5 +18,7 @@
   "continue": "Continuar",
   "restart": "Reiniciar",
   "savedGame": "Você tem um jogo salvo. Deseja continuar?",
-  "startNewGame": "Iniciar Novo Jogo"
+  "startNewGame": "Iniciar Novo Jogo",
+  "newGame": "Novo jogo",
+  "playNow": "Jogar agora"
 }

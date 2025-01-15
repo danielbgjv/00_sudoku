@@ -124,30 +124,31 @@ export default function SudokuPage() {
 
         { !hasSavedGame &&
           <>
-            <div className="mb-4 flex gap-4">
-              <div className='px-3'>
-                <label htmlFor="difficulty" className="mr-2 font-semibold">
-                  { difficul }:
-                </label>
-                <select
-                  id="difficulty"
-                  value={ difficulty }
-                  onChange={ ( e ) => setDifficulty( e.target.value ) }
-                  className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
+            { !savedGame &&
+              <div className="mb-4 flex gap-4">
+                <div className='px-3'>
+                  <label htmlFor="difficulty" className="mr-2 font-semibold">
+                    { difficul }:
+                  </label>
+                  <select
+                    id="difficulty"
+                    value={ difficulty }
+                    onChange={ ( e ) => setDifficulty( e.target.value ) }
+                    className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
+                  >
+                    <option value="easy">{ easy }</option>
+                    <option value="medium">{ medium }</option>
+                    <option value="hard">{ hard }</option>
+                  </select>
+                </div>
+                <button
+                  onClick={ startGame }
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
                 >
-                  <option value="easy">{ easy }</option>
-                  <option value="medium">{ medium }</option>
-                  <option value="hard">{ hard }</option>
-                </select>
+                  { startGame1 }
+                </button>
               </div>
-              <button
-                onClick={ startGame }
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
-              >
-                { startGame1 }
-              </button>
-            </div>
-
+            }
             { game && (
               <SudokuBoard
                 puzzle={ game.puzzle }
@@ -156,6 +157,10 @@ export default function SudokuPage() {
                 savedGame={ savedGame }
               />
             ) }
+            { game &&
+              <button onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); } } className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white mt-5">
+                { t( 'newGame' ) }
+              </button> }
           </> }
 
         <LanguageSwitcher />
@@ -176,7 +181,7 @@ export default function SudokuPage() {
 
                 {/* //botão de novo jogo */ }
                 <button
-                  onClick={ startGame }
+                  onClick={ () => { localStorage.removeItem( 'sudoku' ); setHasSavedGame( false ); setGame( null ); } }
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 >
                   { startNewGame }
