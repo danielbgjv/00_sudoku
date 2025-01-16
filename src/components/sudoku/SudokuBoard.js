@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { isBoardCorrect } from '@/utils/sudokuGenerator';
 import { useTranslation } from 'react-i18next';
 import { saveEncryptedToLocalStorage, getDecryptedFromLocalStorage } from '@/utils/functions';
+import { track } from '@vercel/analytics';
 
 export default function SudokuBoard( { puzzle, solution, onComplete, savedGame, showModal2, setShowModal2, canShowErrors, handlePayment } ) {
   const [ board, setBoard ] = useState( savedGame?.board?.map( ( row ) => [ ...row ] ) || [] ); // Armazena o estado atual do tabuleiro
@@ -31,6 +32,9 @@ export default function SudokuBoard( { puzzle, solution, onComplete, savedGame, 
 
 
   const toggleErrors = () => {
+
+    track( 'Check Errors' );
+
 
     if ( !savedGame?.config?.showErrors ) {
       handlePayment();

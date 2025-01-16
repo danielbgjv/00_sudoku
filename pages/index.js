@@ -12,6 +12,7 @@ import { saveEncryptedToLocalStorage, getDecryptedFromLocalStorage } from '@/uti
 import { loadStripe } from '@stripe/stripe-js';
 import { useRouter } from 'next/router';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { track } from '@vercel/analytics';
 
 const stripePromise = loadStripe( process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY );
 
@@ -63,11 +64,20 @@ const PaymentForm = ( { onClose, onSuccess, clientSecret } ) => {
       setLoading( false );
       //console.error( 'Erro no pagamento:', error.message );
       setMessage( error.message );
+      track( 'payment', {
+        paymentMethod: 'stripe',
+        error: error.message,
+      } );
     } else if ( paymentIntent.status === 'succeeded' ) {
       setLoading( false );
       const savedGame = getDecryptedFromLocalStorage( localStorage.getItem( 'sudoku' ) );
       saveEncryptedToLocalStorage( 'sudoku', { ...savedGame, config: { showErrors: true } } );
       onSuccess();
+      track( 'payment', {
+        paymentMethod: 'stripe',
+        currency: paymentIntent?.currency,
+        amount: paymentIntent?.amount,
+      } );
     }
   };
 
@@ -178,6 +188,11 @@ export default function SudokuPage() {
 
 
   const startGame = () => {
+
+    track( 'newGame', {
+      difficulty,
+    } );
+
     localStorage.removeItem( 'sudoku' ); // Remove o jogo salvo
     const { puzzle, solution } = generateSudoku( difficulty );
     setGame( { puzzle, solution } );
@@ -188,6 +203,10 @@ export default function SudokuPage() {
   };
 
   const handleComplete = () => {
+    track( 'completeGame', {
+      difficulty,
+    } );
+
     setShowModal( true );
   };
 
