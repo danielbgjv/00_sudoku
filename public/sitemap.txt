@@ -1,0 +1,4 @@
+https://sudokudan.vercel.app
+https://sudokudan.vercel.app/pt
+https://sudokudan.vercel.app/en
+https://sudokudan.vercel.app/es

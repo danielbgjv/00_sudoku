@@ -40,6 +40,10 @@ export default function Document( { lang, translations } ) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://sudokodan.vercel.app" />
         <meta name="google-site-verification" content="vEvWUcdENHwE8htXfeqvhp6dwkQ4Zb-aL_AUzQOHwbw" />
+
+        {/* Robots */ }
+        <meta name="robots" content="index, follow" />
+
       </Head>
       <body>
         <Main />
