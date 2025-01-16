@@ -39,6 +39,7 @@ export default function Document( { lang, translations } ) {
         <meta name="theme-color" content="#ffffff" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://sudokodan.vercel.app" />
+        <meta name="google-site-verification" content="vEvWUcdENHwE8htXfeqvhp6dwkQ4Zb-aL_AUzQOHwbw" />
       </Head>
       <body>
         <Main />
