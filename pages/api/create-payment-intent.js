@@ -8,7 +8,7 @@ export default async function handler( req, res ) {
 
         try {
             const paymentIntent = await stripe.paymentIntents.create( {
-                amount: 500, // Exemplo: $5.00
+                amount: 200, // Exemplo: $5.00
                 currency: currency,
                 description: productName,
                 payment_method_types: [ 'card' ],
