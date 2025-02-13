@@ -131,8 +131,63 @@ function countSolutions( board ) {
   return solutions;
 }
 
+// Função auxiliar para identificar o índice do quadrante (0 a 8)
+function getQuadrant( row, col ) {
+  return Math.floor( row / 3 ) * 3 + Math.floor( col / 3 );
+}
+
+// Remove células garantindo solução única e uma distribuição mínima de pistas por quadrante
+function removeCellsKeepUnique( board, minClues = 36, minPerQuadrant = 4 ) {
+  // Cria uma cópia do board
+  const puzzle = board.map( row => row.slice() );
+
+  // Contador total de pistas (inicialmente 81, pois o board está completo)
+  let currentClues = 81;
+
+  // Contador de pistas por quadrante (cada quadrante inicia com 9 pistas)
+  const quadrantClues = Array( 9 ).fill( 9 );
+
+  // Lista todas as posições do board
+  const positions = [];
+  for ( let i = 0; i < 9; i++ ) {
+    for ( let j = 0; j < 9; j++ ) {
+      positions.push( { row: i, col: j } );
+    }
+  }
+
+  // Embaralha as posições para remoção aleatória
+  positions.sort( () => Math.random() - 0.5 );
+
+  // Tenta remover células enquanto houver pistas a remover e sem violar as restrições
+  for ( const { row, col } of positions ) {
+    // Para se o número total de pistas já atingiu o mínimo desejado
+    if ( currentClues <= minClues ) break;
+
+    const quadrant = getQuadrant( row, col );
+
+    // Se a remoção deixaria o quadrante com menos pistas do que o mínimo permitido, pula esta célula
+    if ( quadrantClues[ quadrant ] <= minPerQuadrant ) continue;
+
+    // Backup do valor atual e tenta remover a célula
+    const backup = puzzle[ row ][ col ];
+    puzzle[ row ][ col ] = 0;
+
+    // Verifica se a remoção mantém a unicidade da solução
+    if ( countSolutions( puzzle ) !== 1 ) {
+      // Se não, restaura o valor
+      puzzle[ row ][ col ] = backup;
+    } else {
+      // Remoção bem-sucedida: atualiza os contadores
+      quadrantClues[ quadrant ]--;
+      currentClues--;
+    }
+  }
+
+  return puzzle;
+}
+
 // Remove elementos e mantém unicidade
-function removeCellsKeepUnique( board, attempts = 50 ) {
+/* function removeCellsKeepUnique( board, attempts = 50 ) {
   // Copia o board
   const puzzle = board.map( ( row ) => row.slice() );
 
@@ -160,36 +215,40 @@ function removeCellsKeepUnique( board, attempts = 50 ) {
   }
 
   return puzzle;
-}
+} */
 
 // ---------------------------
 // 4. Geração final do Sudoku
 // ---------------------------
 
 // Exemplos de escalas de remoção (há várias formas de controlar dificuldade)
-function generateSudoku( difficulty = 'medium' ) {
+function generateSudoku( difficulty = 'easy' ) {
   // 1) Gera a solução completa
   const solution = generateFullSolution();
-
-  // 2) Remove de acordo com a dificuldade
-  let attempts;
+  // 2) Define o número mínimo de dicas de acordo com a dificuldade
+  let minClues;
+  let minPerQuadrant;
   switch ( difficulty ) {
     case 'easy':
-      attempts = 40;
+      minClues = 36; // mais dicas = quebra-cabeça mais fácil
+      minPerQuadrant = 4;
       break;
     case 'medium':
-      attempts = 50;
+      minClues = 28;
+      minPerQuadrant = 3;
       break;
     case 'hard':
-      attempts = 70;
+      minClues = 20;
+      minPerQuadrant = 2;
       break;
     default:
-      attempts = 50;
+      minClues = 46;
       break;
   }
 
-  // Remove as células, garantindo que o Sudoku permanece com uma única solução
-  const puzzle = removeCellsKeepUnique( solution, attempts );
+  // Remove as células, garantindo que o Sudoku permanece com uma única solução e com pelo menos "minClues" dicas
+  const puzzle = removeCellsKeepUnique( solution, minClues, minPerQuadrant );
+
 
   return { puzzle, solution };
 }
