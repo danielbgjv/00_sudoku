@@ -27,5 +27,9 @@
   "cancel": "Cancel",
   "paymentError": "Your card was declined, please try again or contact support.",
   "errorMessage": "Error message",
-  "paying": "Paying..."
+  "paying": "Paying...",
+  "score": "Score",
+  "easyPhrase": "By winning the easy level you earn 10 points!",
+  "mediumPhrase": "By winning the medium level you earn 20 points!",
+  "hardPhrase": "By winning the hard level you earn 30 points!"
 }

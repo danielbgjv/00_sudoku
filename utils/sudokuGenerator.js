@@ -136,7 +136,41 @@ function getQuadrant( row, col ) {
   return Math.floor( row / 3 ) * 3 + Math.floor( col / 3 );
 }
 
-// Remove células garantindo solução única e uma distribuição mínima de pistas por quadrante
+// Função auxiliar que verifica a distribuição das dicas dentro do quadrante,
+// simulando a remoção da célula (removalRow, removalCol).
+// Se o quadrante possuir mais de uma dica, exige que elas estejam em pelo menos 2 linhas e 2 colunas.
+function checkQuadrantDistribution( puzzle, quadrant, removalRow, removalCol ) {
+  const startRow = Math.floor( quadrant / 3 ) * 3;
+  const startCol = ( quadrant % 3 ) * 3;
+
+  const rowsWithClues = new Set();
+  const colsWithClues = new Set();
+  let totalClues = 0;
+
+  // Varre as células do quadrante simulando a remoção na posição (removalRow, removalCol)
+  for ( let i = 0; i < 3; i++ ) {
+    for ( let j = 0; j < 3; j++ ) {
+      const r = startRow + i;
+      const c = startCol + j;
+      // Ignora a célula que pretendemos remover
+      if ( r === removalRow && c === removalCol ) continue;
+      if ( puzzle[ r ][ c ] !== 0 ) {
+        rowsWithClues.add( i );
+        colsWithClues.add( j );
+        totalClues++;
+      }
+    }
+  }
+
+  // Se houver mais de uma dica, exigimos que elas estejam distribuídas em pelo menos 2 linhas e 2 colunas.
+  if ( totalClues > 1 && ( rowsWithClues.size < 2 || colsWithClues.size < 2 ) ) {
+    return false;
+  }
+  return true;
+}
+
+// Remove células garantindo solução única e uma distribuição mínima de pistas por quadrante,
+// além de verificar a distribuição interna dentro do quadrante.
 function removeCellsKeepUnique( board, minClues = 36, minPerQuadrant = 4 ) {
   // Cria uma cópia do board
   const puzzle = board.map( row => row.slice() );
@@ -160,13 +194,19 @@ function removeCellsKeepUnique( board, minClues = 36, minPerQuadrant = 4 ) {
 
   // Tenta remover células enquanto houver pistas a remover e sem violar as restrições
   for ( const { row, col } of positions ) {
-    // Para se o número total de pistas já atingiu o mínimo desejado
+    // Se já removemos o suficiente, para
     if ( currentClues <= minClues ) break;
+
+    // Se já estiver removida, pula
+    if ( puzzle[ row ][ col ] === 0 ) continue;
 
     const quadrant = getQuadrant( row, col );
 
-    // Se a remoção deixaria o quadrante com menos pistas do que o mínimo permitido, pula esta célula
+    // Garante o mínimo por quadrante
     if ( quadrantClues[ quadrant ] <= minPerQuadrant ) continue;
+
+    // Verifica a distribuição interna no quadrante simulando a remoção desta célula
+    if ( !checkQuadrantDistribution( puzzle, quadrant, row, col ) ) continue;
 
     // Backup do valor atual e tenta remover a célula
     const backup = puzzle[ row ][ col ];
@@ -185,37 +225,6 @@ function removeCellsKeepUnique( board, minClues = 36, minPerQuadrant = 4 ) {
 
   return puzzle;
 }
-
-// Remove elementos e mantém unicidade
-/* function removeCellsKeepUnique( board, attempts = 50 ) {
-  // Copia o board
-  const puzzle = board.map( ( row ) => row.slice() );
-
-  // O "attempts" aqui controla quantas remoções tentaremos fazer.
-  while ( attempts > 0 ) {
-    const row = Math.floor( Math.random() * 9 );
-    const col = Math.floor( Math.random() * 9 );
-
-    // Se já estiver vazio, continue
-    if ( puzzle[ row ][ col ] === 0 ) {
-      attempts--;
-      continue;
-    }
-
-    const backup = puzzle[ row ][ col ];
-    puzzle[ row ][ col ] = 0;
-
-    // Verifica se ainda tem solução única
-    const solutionsCount = countSolutions( puzzle );
-    if ( solutionsCount !== 1 ) {
-      // Se não é única, restaura e diminui a tentativas
-      puzzle[ row ][ col ] = backup;
-      attempts--;
-    }
-  }
-
-  return puzzle;
-} */
 
 // ---------------------------
 // 4. Geração final do Sudoku

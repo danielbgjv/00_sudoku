@@ -13,6 +13,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useRouter } from 'next/router';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { track } from '@vercel/analytics';
+import { updateScore, getScore } from '@/utils/scoring';
 
 const stripePromise = loadStripe( process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY );
 
@@ -127,6 +128,11 @@ export default function SudokuPage() {
   const router = useRouter();
   const [ clientSecret, setClientSecret ] = useState( '' );
   const [ canShowErrors, setCanShowErrors ] = useState( false );
+  const [ score, setScore ] = useState( '' );
+  const [ easyPhrase, setEasyPhrase ] = useState( '' );
+  const [ mediumPhrase, setMediumPhrase ] = useState( '' );
+  const [ hardPhrase, setHardPhrase ] = useState( '' );
+
 
   const handlePayment = async () => {
     const locale = router.locale || 'en';
@@ -183,6 +189,10 @@ export default function SudokuPage() {
       setTitlePay( t( 'titlePay' ) );
       setPayMassage( t( 'payMassage' ) );
       setPay( t( 'pay' ) );
+      setScore( t( 'score' ) );
+      setEasyPhrase( t( 'easyPhrase' ) );
+      setMediumPhrase( t( 'mediumPhrase' ) );
+      setHardPhrase( t( 'hardPhrase' ) );
     }
   }, [ t ] );
 
@@ -207,6 +217,8 @@ export default function SudokuPage() {
       difficulty,
     } );
 
+    updateScore( difficulty );
+
     setShowModal( true );
   };
 
@@ -218,6 +230,11 @@ export default function SudokuPage() {
       <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center pt-10">
         <Image src="/logo.png" width={ 100 } height={ 100 } alt="Sudoku" />
         <h1 className="text-3xl font-bold mb-6 px-3 text-center mt-5">{ title }</h1>
+
+        {/* componente da pontuação */ }
+        <div className="bg-gray-700 p-3 rounded-md mb-14">
+          <p>{ score }: { getScore() }</p>
+        </div>
 
         {
           hasSavedGame && showSavedGame && (
@@ -259,29 +276,32 @@ export default function SudokuPage() {
         { !hasSavedGame &&
           <>
             { !savedGame &&
-              <div className="mb-4 flex gap-4">
-                <div className='px-3'>
-                  <label htmlFor="difficulty" className="mr-2 font-semibold">
-                    { difficul }:
-                  </label>
-                  <select
-                    id="difficulty"
-                    value={ difficulty }
-                    onChange={ ( e ) => setDifficulty( e.target.value ) }
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
+              <>
+                <div className="mb-4 flex gap-4">
+                  <div className='px-3'>
+                    <label htmlFor="difficulty" className="mr-2 font-semibold">
+                      { difficul }:
+                    </label>
+                    <select
+                      id="difficulty"
+                      value={ difficulty }
+                      onChange={ ( e ) => setDifficulty( e.target.value ) }
+                      className="bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white rounded"
+                    >
+                      <option value="easy">{ easy }</option>
+                      <option value="medium">{ medium }</option>
+                      <option value="hard">{ hard }</option>
+                    </select>
+                  </div>
+                  <button
+                    onClick={ startGame }
+                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
                   >
-                    <option value="easy">{ easy }</option>
-                    <option value="medium">{ medium }</option>
-                    <option value="hard">{ hard }</option>
-                  </select>
+                    { startGame1 }
+                  </button>
                 </div>
-                <button
-                  onClick={ startGame }
-                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
-                >
-                  { startGame1 }
-                </button>
-              </div>
+                <p className="text-center text-sm italic">*{ difficulty === 'easy' ? easyPhrase : difficulty === 'medium' ? mediumPhrase : hardPhrase } </p>
+              </>
             }
             { game && (
               <SudokuBoard

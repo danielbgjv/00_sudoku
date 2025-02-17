@@ -27,5 +27,9 @@
   "cancel": "Cancelar",
   "paymentError": "Tu tarjeta fue rechazada, inténtalo de nuevo o contacta al soporte.",
   "errorMessage": "Mensaje de error",
-  "paying": "Pagando..."
+  "paying": "Pagando...",
+  "score": "Puntuación",
+  "easyPhrase": "¡Al ganar el nivel fácil obtienes 10 puntos!",
+  "mediumPhrase": "¡Al ganar el nivel medio obtienes 20 puntos!",
+  "hardPhrase": "¡Al ganar el nivel difícil obtienes 30 puntos!"
 }
